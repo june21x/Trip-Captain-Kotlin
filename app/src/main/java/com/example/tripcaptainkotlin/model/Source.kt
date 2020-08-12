@@ -1,0 +1,6 @@
+package com.example.tripcaptainkotlin.model
+
+data class Source(
+    val id: String,
+    val name: String
+)

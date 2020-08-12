@@ -1,8 +1,7 @@
-package com.example.tripcaptainkotlin
+package com.example.tripcaptainkotlin.view.ui.activity
 
 import android.app.ActivityOptions
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +9,8 @@ import android.transition.Explode
 import android.view.View
 import android.view.Window
 import android.view.animation.AnimationUtils
+import androidx.appcompat.app.AppCompatActivity
+import com.example.tripcaptainkotlin.R
 import kotlinx.android.synthetic.main.activity_splash_screen.*
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -26,10 +27,20 @@ class SplashScreenActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash_screen)
 
         ivLogo.visibility = View.VISIBLE
-        ivLogo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.top_animation))
+        ivLogo.startAnimation(
+            AnimationUtils.loadAnimation(
+                this,
+                R.anim.top_animation
+            )
+        )
 
         tvLogo.visibility = View.VISIBLE
-        tvLogo.startAnimation(AnimationUtils.loadAnimation(this, R.anim.bottom_animation))
+        tvLogo.startAnimation(
+            AnimationUtils.loadAnimation(
+                this,
+                R.anim.bottom_animation
+            )
+        )
 
         Handler(Looper.getMainLooper()).postDelayed({
             val intent = Intent(this, MainActivity::class.java)

@@ -1,9 +1,21 @@
 <resources>
-    <string name="app_name">Trip Captain (Kotlin)</string>
-    <string name="google_maps_key">AIzaSyD4F0mXTSJ65k_bqNr8WL68IyPl_1FsA1s</string>
-
+    <string name="app_name">TRIP CAPTAIN</string>
     <!--    Permissions    -->
     <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="location_permission_denied">This sample requires location permission to enable the \'my location\' layer. Please try again and grant access to use the location.\nIf the permission has been permanently denied, it can be enabled from the System Settings &gt; Apps &gt; \'Google Maps API Demos\'.</string>
     <string name="permission_required_toast">Location permission is required for this demo.</string>
+    <!--    News API    -->
+    <string name="news_api_country">my</string>
+    <string name="news_api_keyword">keyword</string>
+    <string name="news_api_key">b1aeb4b3f09342de95e6a96ba7002852</string>
+    <string name="loading_news">Loading News ...</string>
+    <string name="article_list">Article List</string>
+    <string name="no_image_url">https://thumbs.dreamstime.com/b/no-image-available-icon-photo-camera-flat-vector-illustration-132483097.jpg</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="view_in_ar">View in AR</string>
+    <string name="back">Back</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
 </resources>

@@ -7,6 +7,16 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!-- Sceneform requires OpenGL ES 3.0 or later. -->
+    <uses-feature
+        android:glEsVersion="0x00030000"
+        android:required="true" />
+
+    <!-- Indicates that app requires ARCore ("AR Required"). Ensures the app is
+     visible only in the Google Play Store on devices that support ARCore.
+     For "AR Optional" apps remove this line. -->
+    <uses-feature android:name="android.hardware.camera.ar" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -14,8 +24,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".SplashScreenActivity">
+        <!-- Indicates that this app requires Google Play Services for AR ("AR Required") and causes
+             the Google Play Store to download and intall Google Play Services for AR along with
+             the app. For an "AR Optional" app, specify "optional" instead of "required". -->
+        <meta-data
+            android:name="com.google.ar.core"
+            android:value="required" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity android:name=".view.ui.activity.ArPlaceActivity"></activity>
+        <activity android:name=".view.ui.activity.MainActivity" />
+        <activity android:name=".view.ui.activity.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
