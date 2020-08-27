@@ -28,7 +28,7 @@ class ArticleListFragment : Fragment() {
     private val articleAdapter: ArticleAdapter = ArticleAdapter(object : ArticleClickCallback {
         override fun onClickArticle(article: Article) {
             if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && activity is MainActivity) {
-                (activity as MainActivity).viewArticle(article)
+                viewArticle(article)
             }
         }
     })
@@ -60,6 +60,17 @@ class ArticleListFragment : Fragment() {
                 articleAdapter.setArticleList(articles)
             }
         })
+    }
+
+    fun viewArticle(article: Article) {
+        val articleFragment = ArticleFragment.forArticle(article.url) //詳細のFragment
+
+        (activity as MainActivity).supportFragmentManager
+            .beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.fragmentContainer, articleFragment, null)
+            .commit()
+
     }
 }
 

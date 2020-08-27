@@ -1,6 +1,6 @@
 package com.example.tripcaptainkotlin.repository
 
-import com.example.tripcaptainkotlin.model.News
+import com.example.tripcaptainkotlin.model.ArticlesResponse
 import com.example.tripcaptainkotlin.service.NewsService
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -29,7 +29,11 @@ class NewsRepository {
         NewsService::class.java
     )
 
-    suspend fun getArticleList(country: String, keyword: String, apiKey: String): Response<News> =
+    suspend fun getArticleList(
+        country: String,
+        keyword: String,
+        apiKey: String
+    ): Response<ArticlesResponse> =
         newsService.getArticleList(country, keyword, apiKey)
 
 }

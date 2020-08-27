@@ -83,8 +83,7 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val permissions = listOf(
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.ACCESS_FINE_LOCATION
+            android.Manifest.permission.CAMERA
         )
 
         Dexter.withActivity(this@ArPlaceActivity)
@@ -166,7 +165,7 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
         for (place in places) {
             // Add the place in AR
-            val placeNode = PlaceNode(this, place)
+            val placeNode = PlaceNode(this, arFragment.transformationSystem, true, place)
             placeNode.setParent(anchorNode)
             placeNode.localPosition =
                 place.getPositionVector(orientationAngles[0], currentLocation.latLng)
@@ -205,30 +204,6 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         matchingMarker?.showInfoWindow()
     }
 
-
-    @SuppressLint("MissingPermission")
-    private fun setUpMaps() {
-        mapFragment.getMapAsync { googleMap ->
-
-            googleMap.isMyLocationEnabled = true
-
-            getCurrentLocation {
-                val pos = CameraPosition.fromLatLngZoom(it.latLng, 13f)
-                googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(pos))
-                getNearbyPlaces(it)
-            }
-            googleMap.setOnMarkerClickListener { marker ->
-                val tag = marker.tag
-                if (tag !is Place) {
-                    return@setOnMarkerClickListener false
-                }
-                showInfoWindow(tag)
-                return@setOnMarkerClickListener true
-            }
-            map = googleMap
-        }
-    }
-
     private fun createLocationRequest() {
         locationRequest = LocationRequest().apply {
             interval = 500
@@ -265,6 +240,29 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
     }
 
     @SuppressLint("MissingPermission")
+    private fun setUpMaps() {
+        mapFragment.getMapAsync { googleMap ->
+
+            googleMap.isMyLocationEnabled = true
+
+            getCurrentLocation {
+                val pos = CameraPosition.fromLatLngZoom(it.latLng, 16f)
+                googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(pos))
+                getNearbyPlaces(it)
+            }
+            googleMap.setOnMarkerClickListener { marker ->
+                val tag = marker.tag
+                if (tag !is Place) {
+                    return@setOnMarkerClickListener false
+                }
+                showInfoWindow(tag)
+                return@setOnMarkerClickListener true
+            }
+            map = googleMap
+        }
+    }
+
+    @SuppressLint("MissingPermission")
     private fun getCurrentLocation(onSuccess: (Location) -> Unit) {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             currentLocation = location
@@ -293,7 +291,7 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         placesService.nearbyPlaces(
             apiKey = apiKey,
             location = "${location.latitude},${location.longitude}",
-            radiusInMeters = 2000,
+            radiusInMeters = 500,
             placeType = "cafe"
         ).enqueue(
             object : Callback<NearbyPlacesResponse> {

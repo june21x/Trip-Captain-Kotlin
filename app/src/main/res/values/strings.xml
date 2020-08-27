@@ -17,5 +17,7 @@
     <string name="back">Back</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="switch_place_type">Switch Place Type</string>
+    <string name="switch_place">Switch Place</string>
 
 </resources>

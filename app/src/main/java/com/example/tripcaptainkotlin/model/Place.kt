@@ -14,6 +14,12 @@
 
 package com.example.tripcaptainkotlin.model
 
+import android.content.Context
+import android.widget.ImageView
+import androidx.databinding.BindingAdapter
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.example.tripcaptainkotlin.R
 import com.google.android.gms.maps.model.LatLng
 import com.google.ar.sceneform.math.Vector3
 import com.google.maps.android.ktx.utils.sphericalHeading
@@ -27,7 +33,10 @@ data class Place(
     val id: String,
     val icon: String,
     val name: String,
-    val geometry: Geometry
+    val geometry: Geometry,
+    val photos: List<PlacePhoto>?,
+    val opening_hours: OpeningHours,
+    val rating: Float
 ) {
     override fun equals(other: Any?): Boolean {
         if (other !is Place) {
@@ -39,6 +48,36 @@ data class Place(
     override fun hashCode(): Int {
         return this.id.hashCode()
     }
+
+    companion object {
+        @BindingAdapter("placePhoto")
+        @JvmStatic
+        fun loadImage(view: ImageView, photoRef: String?) {
+            if (photoRef != null) {
+                Glide.with(view.context)
+                    .load(getPhotoURL(view.context, photoRef))
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(view)
+            } else {
+                Glide.with(view.context)
+                    .load(view.context.getString(R.string.no_image_url))
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .into(view)
+            }
+
+        }
+
+        fun getPhotoURL(context: Context, photoRef: String): String? {
+            val photoBaseURL = "https://maps.googleapis.com/maps/api/place/photo?"
+            val APIkey: String = context.getString(R.string.google_maps_key)
+            val maxHeight = "1600"
+            return (photoBaseURL
+                    + "maxheight=" + maxHeight
+                    + "&photoreference=" + photoRef
+                    + "&key=" + APIkey)
+        }
+    }
+
 }
 
 fun Place.getPositionVector(azimuth: Float, latLng: LatLng): Vector3 {
@@ -62,3 +101,14 @@ data class GeometryLocation(
     val latLng: LatLng
         get() = LatLng(lat, lng)
 }
+
+data class PlacePhoto(
+    val height: Int,
+    val html_attributions: List<String>?,
+    val photo_reference: String?,
+    val width: Int
+)
+
+data class OpeningHours(
+    val open_now: Boolean
+)

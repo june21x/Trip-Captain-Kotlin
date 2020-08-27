@@ -19,13 +19,19 @@ import android.view.View
 import android.widget.TextView
 import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.model.Place
-import com.google.ar.sceneform.Node
+import com.google.ar.sceneform.FrameTime
+import com.google.ar.sceneform.math.Quaternion
+import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ViewRenderable
+import com.google.ar.sceneform.ux.TransformableNode
+import com.google.ar.sceneform.ux.TransformationSystem
 
 class PlaceNode(
     val context: Context,
+    transformationSystem: TransformationSystem,
+    var billboarding: Boolean,
     val place: Place?
-) : Node() {
+) : TransformableNode(transformationSystem) {
 
     private var placeRenderable: ViewRenderable? = null
     private var textViewPlace: TextView? = null
@@ -47,6 +53,8 @@ class PlaceNode(
             .thenAccept { renderable ->
                 setRenderable(renderable)
                 placeRenderable = renderable
+                renderable.isShadowCaster = false
+                renderable.isShadowReceiver = false
 
                 place?.let {
                     textViewPlace = renderable.view.findViewById(R.id.placeName)
@@ -54,6 +62,21 @@ class PlaceNode(
                 }
             }
     }
+
+    override fun onUpdate(frameTime: FrameTime?) {
+        if (billboarding) {
+            scene?.let {
+                val cameraPosition = it.camera.worldPosition
+                val uiPosition: Vector3 = worldPosition
+                val direction = Vector3.subtract(cameraPosition, uiPosition)
+                direction.y = 0.0f
+                val lookRotation =
+                    Quaternion.lookRotation(direction, Vector3.up())
+                worldRotation = lookRotation
+            }
+        }
+    }
+
 
     fun showInfoWindow() {
         // Show text
@@ -68,4 +91,5 @@ class PlaceNode(
             (it as PlaceNode).textViewPlace?.visibility = View.GONE
         }
     }
+
 }

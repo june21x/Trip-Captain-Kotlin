@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/rgPlaceType">
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbAmusementPark"
+                android:textSize="16sp"
+                android:text="Amusement Park" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbATM"
+                android:textSize="16sp"
+                android:text="ATM" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbCafe"
+                android:textSize="16sp"
+                android:checked="true"
+                android:text="Cafe" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbCarRental"
+                android:textSize="16sp"
+                android:text="Car Rental" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbMuseum"
+                android:textSize="16sp"
+                android:text="Museum" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbTheater"
+                android:textSize="16sp"
+                android:text="Theater" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbTouristAttraction"
+                android:textSize="16sp"
+                android:text="Tourist Attraction" />
+
+        </RadioGroup>
+
+    </ScrollView>
+
+</LinearLayout>
