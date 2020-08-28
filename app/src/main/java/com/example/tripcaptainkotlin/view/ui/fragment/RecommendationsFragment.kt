@@ -3,12 +3,16 @@ package com.example.tripcaptainkotlin.view.ui.fragment
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityOptions
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -19,10 +23,12 @@ import com.example.tripcaptainkotlin.databinding.FragmentRecommendationsBinding
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.utility.GpsUtils
 import com.example.tripcaptainkotlin.view.adapter.PlacesAdapter
-import com.example.tripcaptainkotlin.view.callback.PlaceClickCallback
+import com.example.tripcaptainkotlin.view.ui.activity.ArPlaceActivity
 import com.example.tripcaptainkotlin.view.ui.activity.MainActivity
 import com.example.tripcaptainkotlin.viewModel.LocationViewModel
 import com.example.tripcaptainkotlin.viewModel.PlaceListViewModel
+import kotlinx.android.synthetic.main.fragment_recommendations.*
+import kotlinx.android.synthetic.main.layout_place_type_selection.view.*
 
 class RecommendationsFragment() : Fragment() {
 
@@ -34,12 +40,11 @@ class RecommendationsFragment() : Fragment() {
     private lateinit var binding: FragmentRecommendationsBinding
 
     private var isGPSEnabled = false
+    private var checkedId = R.id.rbCafe
+    private lateinit var currentLocation: Location
+    private var placeType = "cafe"
 
-    private val placesAdapter: PlacesAdapter = PlacesAdapter(object : PlaceClickCallback {
-        override fun onClickSavePlace(place: Place) {
-            //TODO Save Place to Trip
-        }
-    })
+    private val placesAdapter: PlacesAdapter = PlacesAdapter(this@RecommendationsFragment)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +68,7 @@ class RecommendationsFragment() : Fragment() {
             DataBindingUtil.inflate(inflater, R.layout.fragment_recommendations, container, false)
         binding.apply {
             rvPlace.adapter = placesAdapter
-            mActivity = activity as MainActivity
+            recommendationsFragment = this@RecommendationsFragment
         }
         return binding.root
     }
@@ -148,15 +153,67 @@ class RecommendationsFragment() : Fragment() {
 
     private fun startLocationUpdate() {
         locationViewModel.getLocationData().observe(viewLifecycleOwner, Observer {
-            placeListViewModel.loadPlaceList(it, "cafe")
+            currentLocation = it
+            placeListViewModel.loadPlaceList(currentLocation, placeType)
             placeListViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
-                if (places != null) {
-                    binding.isLoading = false
-                    placesAdapter.setPlaceList(places)
-                }
+                updateRecyclerView(places)
             })
 
         })
+    }
+
+    fun switchPlaceType() {
+        // create an alert builder
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder.setTitle("Select a Place Type")
+        // set the custom layout
+        val customLayout: View = layoutInflater.inflate(R.layout.layout_place_type_selection, null)
+        customLayout.findViewById<RadioButton>(checkedId).isChecked = true
+        builder.setView(customLayout)
+
+        // create and show the alert dialog
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+
+        customLayout.rgPlaceType.setOnCheckedChangeListener { group, checkedId ->
+            this.checkedId = checkedId
+            val radioButton: RadioButton = group.findViewById(this.checkedId)
+            this.placeType = radioButton.text.toString().toLowerCase().replace(' ', '_')
+
+            placeListViewModel.loadPlaceList(currentLocation, this.placeType)
+            placeListViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
+                updateRecyclerView(places)
+            })
+            dialog.dismiss()
+        }
+
+    }
+
+    fun viewPlacesInAR(place: Place) {
+        val intent = Intent(activity as MainActivity, ArPlaceActivity::class.java)
+        intent.putExtra("Place", place)
+        startActivity(
+            intent,
+            ActivityOptions.makeSceneTransitionAnimation(activity as MainActivity).toBundle()
+        )
+        onPause()
+    }
+
+    fun savePlace(place: Place) {
+        //TODO
+    }
+
+    private fun updateRecyclerView(places: List<Place>) {
+        if (places != null) {
+            rvPlace.visibility = View.VISIBLE
+            llNoResult.visibility = View.GONE
+            placesAdapter.setPlaceList(places)
+
+            if (places.isEmpty()) {
+                rvPlace.visibility = View.GONE
+                llNoResult.visibility = View.VISIBLE
+            }
+        }
     }
 }
 

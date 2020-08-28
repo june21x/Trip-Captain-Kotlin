@@ -3,14 +3,13 @@ package com.example.tripcaptainkotlin.view.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.databinding.ItemPlaceBinding
 import com.example.tripcaptainkotlin.model.Place
-import com.example.tripcaptainkotlin.view.callback.PlaceClickCallback
+import com.example.tripcaptainkotlin.view.ui.fragment.RecommendationsFragment
 
-class PlacesAdapter(private val placeClickCallback: PlaceClickCallback?) :
+class PlacesAdapter(val fragment: RecommendationsFragment) :
     RecyclerView.Adapter<PlacesAdapter.PlaceViewHolder>() {
 
     private var placeList: List<Place>? = null
@@ -20,31 +19,8 @@ class PlacesAdapter(private val placeClickCallback: PlaceClickCallback?) :
             this.placeList = placeList
             notifyItemRangeInserted(0, placeList.size)
         } else {
-            val result = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                override fun getOldListSize(): Int {
-                    return requireNotNull(this@PlacesAdapter.placeList).size
-                }
-
-                override fun getNewListSize(): Int {
-                    return placeList.size
-                }
-
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    val oldList = this@PlacesAdapter.placeList
-                    return oldList?.get(oldItemPosition)?.id == placeList[newItemPosition].id
-                }
-
-                override fun areContentsTheSame(
-                    oldItemPosition: Int,
-                    newItemPosition: Int
-                ): Boolean {
-                    val place = placeList[newItemPosition]
-                    val old = placeList[oldItemPosition]
-                    return place.id == old.id
-                }
-            })
             this.placeList = placeList
-            result.dispatchUpdatesTo(this)
+            notifyDataSetChanged()
         }
     }
 
@@ -57,7 +33,10 @@ class PlacesAdapter(private val placeClickCallback: PlaceClickCallback?) :
             R.layout.item_place, parent,
             false
         ) as ItemPlaceBinding
-        binding.callback = placeClickCallback
+        binding.apply {
+            recommendationsFragment = fragment
+
+        }
         return PlaceViewHolder(binding)
     }
 

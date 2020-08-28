@@ -15,10 +15,13 @@
 package com.example.tripcaptainkotlin.ar
 
 import android.content.Context
+import android.location.Location
 import android.view.View
 import android.widget.TextView
 import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.model.Place
+import com.example.tripcaptainkotlin.model.getDistance
+import com.example.tripcaptainkotlin.view.ui.activity.latLng
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
@@ -30,11 +33,13 @@ class PlaceNode(
     val context: Context,
     transformationSystem: TransformationSystem,
     var billboarding: Boolean,
-    val place: Place?
+    val place: Place,
+    var currentLocation: Location
 ) : TransformableNode(transformationSystem) {
 
     private var placeRenderable: ViewRenderable? = null
     private var textViewPlace: TextView? = null
+    private var textViewDistance: TextView? = null
 
     override fun onActivate() {
         super.onActivate()
@@ -58,7 +63,11 @@ class PlaceNode(
 
                 place?.let {
                     textViewPlace = renderable.view.findViewById(R.id.placeName)
+                    textViewDistance = renderable.view.findViewById(R.id.placeDistance)
+
                     textViewPlace?.text = it.name
+                    textViewDistance?.text =
+                        "${"%.2f".format(it.getDistance(currentLocation.latLng))} m"
                 }
             }
     }

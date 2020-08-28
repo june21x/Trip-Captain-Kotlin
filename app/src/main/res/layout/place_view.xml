@@ -15,15 +15,17 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_width="300dp"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@mipmap/ic_launcher_round" />
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/ic_trip_captain" />
 
     <TextView
         android:id="@+id/placeName"
@@ -31,13 +33,39 @@
         android:layout_height="wrap_content"
         android:text="TEST"
         android:visibility="visible"
-        android:layout_gravity="center"
         android:gravity="center"
         android:textColor="@android:color/white"
         android:shadowColor="@android:color/black"
         android:shadowRadius="1"
         android:shadowDx="1"
         android:shadowDy="1"
-        android:textSize="24sp" />
+        android:textSize="36sp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/colorPrimaryDarka50"
+        app:contentPadding="10dp"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:id="@+id/placeDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="0 m"
+            android:fontFamily="@font/press_start_2p"
+            android:visibility="visible"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:shadowColor="@android:color/black"
+            android:shadowRadius="1"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:textSize="24sp" />
+
+    </androidx.cardview.widget.CardView>
+
 
 </LinearLayout>

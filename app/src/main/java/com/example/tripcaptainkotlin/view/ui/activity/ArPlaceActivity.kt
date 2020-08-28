@@ -3,7 +3,6 @@ package com.example.tripcaptainkotlin.view.ui.activity
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
-import android.content.IntentSender
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -14,15 +13,18 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.ar.PlaceNode
 import com.example.tripcaptainkotlin.ar.PlacesArFragment
-import com.example.tripcaptainkotlin.model.NearbyPlacesResponse
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.model.getPositionVector
 import com.example.tripcaptainkotlin.service.PlacesService
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
+import com.example.tripcaptainkotlin.viewModel.LocationViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -30,27 +32,26 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.Task
 import com.google.ar.sceneform.AnchorNode
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
     private val REQUEST_CHECK_SETTINGS = 0x1;
     private val TAG = "ArPlaceActivity"
 
+    private lateinit var place: Place
+
     private lateinit var placesService: PlacesService
     private lateinit var arFragment: PlacesArFragment
     private lateinit var mapFragment: SupportMapFragment
 
     // Location
+    private lateinit var locationViewModel: LocationViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
 
@@ -63,16 +64,19 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
     private var anchorNode: AnchorNode? = null
     private var markers: MutableList<Marker> = emptyList<Marker>().toMutableList()
-    private var places: List<Place>? = null
-    private var currentLocation: Location? = null
+    private lateinit var currentLocation: Location
     private var map: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         if (!isSupportedDevice()) {
             return
         }
         setContentView(R.layout.activity_ar_place)
+
+        locationViewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
+        place = intent.getParcelableExtra("Place")!!
 
         arFragment = supportFragmentManager.findFragmentById(R.id.ar_fragment) as PlacesArFragment
         mapFragment =
@@ -95,8 +99,13 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
                     report?.let {
                         if (report.areAllPermissionsGranted()) {
                             Toast.makeText(this@ArPlaceActivity, "OK", Toast.LENGTH_SHORT)
+
+                            locationViewModel.getLocationData()
+                                .observe(this@ArPlaceActivity, Observer {
+                                    currentLocation = it
+                                })
                             setUpAr()
-                            createLocationRequest()
+                            setUpMaps()
 
                         }
                     }
@@ -115,8 +124,8 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
                 Toast.makeText(this@ArPlaceActivity, it.name, Toast.LENGTH_SHORT)
             }
             .check()
-
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -146,44 +155,35 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
             val anchor = hitResult.createAnchor()
             anchorNode = AnchorNode(anchor)
             anchorNode?.setParent(arFragment.arSceneView.scene)
-            addPlaces(anchorNode!!)
+            addPlace(anchorNode!!)
         }
     }
 
-    private fun addPlaces(anchorNode: AnchorNode) {
+    private fun addPlace(anchorNode: AnchorNode) {
         val currentLocation = currentLocation
-        if (currentLocation == null) {
-            Log.w(TAG, "Location has not been determined yet")
-            return
+
+        // Add the place in AR
+        val placeNode =
+            PlaceNode(this, arFragment.transformationSystem, true, place, currentLocation)
+        placeNode.setParent(anchorNode)
+        placeNode.localPosition =
+            place.getPositionVector(orientationAngles[0], currentLocation.latLng)
+
+        placeNode.setOnTapListener { _, _ ->
+            showInfoWindow(place)
         }
 
-        val places = places
-        if (places == null) {
-            Log.w(TAG, "No places to put")
-            return
+        // Add the place in maps
+        map?.let {
+            val marker = it.addMarker(
+                MarkerOptions()
+                    .position(place.geometry.location.latLng)
+                    .title(place.name)
+            )
+            marker.tag = place
+            markers.add(marker)
         }
 
-        for (place in places) {
-            // Add the place in AR
-            val placeNode = PlaceNode(this, arFragment.transformationSystem, true, place)
-            placeNode.setParent(anchorNode)
-            placeNode.localPosition =
-                place.getPositionVector(orientationAngles[0], currentLocation.latLng)
-            placeNode.setOnTapListener { _, _ ->
-                showInfoWindow(place)
-            }
-
-            // Add the place in maps
-            map?.let {
-                val marker = it.addMarker(
-                    MarkerOptions()
-                        .position(place.geometry.location.latLng)
-                        .title(place.name)
-                )
-                marker.tag = place
-                markers.add(marker)
-            }
-        }
     }
 
     private fun showInfoWindow(place: Place) {
@@ -204,40 +204,40 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         matchingMarker?.showInfoWindow()
     }
 
-    private fun createLocationRequest() {
-        locationRequest = LocationRequest().apply {
-            interval = 500
-            fastestInterval = 50
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-        val client: SettingsClient = LocationServices.getSettingsClient(this)
-        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-
-        task.addOnSuccessListener { locationSettingsResponse ->
-            // All location settings are satisfied. The client can initialize
-            // location requests here.
-            setUpMaps()
-        }
-
-        task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    exception.startResolutionForResult(
-                        this@ArPlaceActivity,
-                        REQUEST_CHECK_SETTINGS
-                    )
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    // Ignore the error.
-                }
-            }
-        }
-    }
+//    private fun createLocationRequest() {
+//        locationRequest = LocationRequest().apply {
+//            interval = 10000
+//            fastestInterval = 5000
+//            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+//        }
+//
+//        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+//        val client: SettingsClient = LocationServices.getSettingsClient(this)
+//        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+//
+//        task.addOnSuccessListener { locationSettingsResponse ->
+//            // All location settings are satisfied. The client can initialize
+//            // location requests here.
+//            setUpMaps()
+//        }
+//
+//        task.addOnFailureListener { exception ->
+//            if (exception is ResolvableApiException) {
+//                // Location settings are not satisfied, but this can be fixed
+//                // by showing the user a dialog.
+//                try {
+//                    // Show the dialog by calling startResolutionForResult(),
+//                    // and check the result in onActivityResult().
+//                    exception.startResolutionForResult(
+//                        this@ArPlaceActivity,
+//                        REQUEST_CHECK_SETTINGS
+//                    )
+//                } catch (sendEx: IntentSender.SendIntentException) {
+//                    // Ignore the error.
+//                }
+//            }
+//        }
+//    }
 
     @SuppressLint("MissingPermission")
     private fun setUpMaps() {
@@ -245,11 +245,11 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
             googleMap.isMyLocationEnabled = true
 
-            getCurrentLocation {
+            locationViewModel.getLocationData().observe(this@ArPlaceActivity, Observer {
                 val pos = CameraPosition.fromLatLngZoom(it.latLng, 16f)
                 googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(pos))
-                getNearbyPlaces(it)
-            }
+            })
+
             googleMap.setOnMarkerClickListener { marker ->
                 val tag = marker.tag
                 if (tag !is Place) {
@@ -286,34 +286,34 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos))
     }
 
-    private fun getNearbyPlaces(location: Location) {
-        val apiKey = this.getString(R.string.google_maps_key)
-        placesService.nearbyPlaces(
-            apiKey = apiKey,
-            location = "${location.latitude},${location.longitude}",
-            radiusInMeters = 500,
-            placeType = "cafe"
-        ).enqueue(
-            object : Callback<NearbyPlacesResponse> {
-                override fun onFailure(call: Call<NearbyPlacesResponse>, t: Throwable) {
-                    Log.e(TAG, "Failed to get nearby places", t)
-                }
-
-                override fun onResponse(
-                    call: Call<NearbyPlacesResponse>,
-                    response: Response<NearbyPlacesResponse>
-                ) {
-                    if (!response.isSuccessful) {
-                        Log.e(TAG, "Failed to get nearby places")
-                        return
-                    }
-
-                    val places = response.body()?.results ?: emptyList()
-                    this@ArPlaceActivity.places = places
-                }
-            }
-        )
-    }
+//    private fun getNearbyPlaces(location: Location) {
+//        val apiKey = this.getString(R.string.google_maps_key)
+//        placesService.nearbyPlaces(
+//            apiKey = apiKey,
+//            location = "${location.latitude},${location.longitude}",
+//            radiusInMeters = 500,
+//            placeType = "cafe"
+//        ).enqueue(
+//            object : Callback<NearbyPlacesResponse> {
+//                override fun onFailure(call: Call<NearbyPlacesResponse>, t: Throwable) {
+//                    Log.e(TAG, "Failed to get nearby places", t)
+//                }
+//
+//                override fun onResponse(
+//                    call: Call<NearbyPlacesResponse>,
+//                    response: Response<NearbyPlacesResponse>
+//                ) {
+//                    if (!response.isSuccessful) {
+//                        Log.e(TAG, "Failed to get nearby places")
+//                        return
+//                    }
+//
+//                    val places = response.body()?.results ?: emptyList()
+//                    this@ArPlaceActivity.places = places
+//                }
+//            }
+//        )
+//    }
 
     private fun isSupportedDevice(): Boolean {
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

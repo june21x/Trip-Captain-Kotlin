@@ -90,6 +90,7 @@
                 android:id="@+id/tvTitle"
                 android:text="@{article.title}"
                 android:textSize="28sp"
+                android:fontFamily="@font/arimo"
                 android:textColor="@color/colorPrimaryDark"
                 android:gravity="center_vertical" />
 
@@ -98,6 +99,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/tvDescription"
                 android:text="@{article.description}"
+                android:fontFamily="@font/arimo"
                 android:textColor="@color/colorPrimaryDarka50"
                 android:textSize="16sp"
                 android:gravity="center_vertical" />

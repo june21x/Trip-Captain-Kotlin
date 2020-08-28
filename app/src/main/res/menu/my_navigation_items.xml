@@ -4,18 +4,13 @@
     tools:showIn="navigation_view">
 
     <item
-        android:id="@+id/navEditProfile"
-        android:icon="@drawable/ic_menu_editprofile"
-        android:title="Edit Profile" />
+        android:id="@+id/navEditPhoneNumber"
+        android:icon="@drawable/ic_baseline_edit_24"
+        android:title="@string/edit_phone_number" />
 
     <item
-        android:id="@+id/navSettings"
-        android:icon="@drawable/ic_menu_settings"
-        android:title="Settings" />
-
-    <item
-        android:id="@+id/navLogout"
-        android:icon="@drawable/ic_menu_logout"
-        android:title="Logout" />
+        android:id="@+id/navSavedPlaces"
+        android:icon="@drawable/ic_baseline_bookmarks_24"
+        android:title="@string/saved_places" />
 
 </menu>

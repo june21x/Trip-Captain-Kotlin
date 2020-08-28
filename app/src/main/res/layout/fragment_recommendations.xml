@@ -5,12 +5,9 @@
     <data>
 
         <variable
-            name="mActivity"
-            type="com.example.tripcaptainkotlin.view.ui.activity.MainActivity" />
+            name="recommendationsFragment"
+            type="com.example.tripcaptainkotlin.view.ui.fragment.RecommendationsFragment" />
 
-        <variable
-            name="isLoading"
-            type="boolean" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -20,41 +17,53 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPlace"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.079"
+            android:layout_height="650dp"
             app:layoutManager="LinearLayoutManager" />
 
+        <LinearLayout
+            android:id="@+id/llNoResult"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:padding="20dp">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_trip_captain"
+                android:tint="@color/material_on_surface_disabled"
+                android:layout_margin="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/oops_no_such_nearby_place"
+                android:textSize="18sp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:gravity="end"
-            android:padding="30dp"
+            android:padding="20dp"
             android:orientation="horizontal">
 
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:id="@+id/fabSwitchPlaceType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="30dp"
+                android:text="@string/switch_place"
+                app:backgroundTint="@color/colorAccent"
+                app:iconTint="#FFFFFF"
+                android:textColor="#FFFFFF"
                 android:contentDescription="@string/switch_place_type"
-                android:onClick="@{() ->  mActivity.switchPlaceType()}"
+                android:onClick="@{() ->  recommendationsFragment.switchPlaceType()}"
                 app:icon="@drawable/ic_baseline_local_cafe_24" />
-
-            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-                android:id="@+id/fabViewInAr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/view_in_ar"
-                android:onClick="@{() ->  mActivity.viewPlacesInAR()}"
-                android:text="@string/view_in_ar"
-                app:icon="@drawable/ic_baseline_visibility_24" />
 
         </LinearLayout>
 

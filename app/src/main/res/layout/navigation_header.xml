@@ -14,16 +14,18 @@
         android:id="@+id/ivProfile"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:contentDescription="Profile Image"
+        android:contentDescription="@string/profile_image"
+        android:src="@drawable/ic_trip_captain"
         android:layout_marginBottom="20dp" />
 
     <TextView
+        android:id="@+id/tvPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tvName"
-        android:text="June"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/arimo"
+        android:text="012-3456789"
         android:textColor="#FFFFFF"
-        android:textSize="36sp"
-        android:layout_marginBottom="10dp" />
+        android:textSize="28sp" />
 
 </LinearLayout>

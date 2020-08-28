@@ -19,5 +19,10 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="switch_place_type">Switch Place Type</string>
     <string name="switch_place">Switch Place</string>
+    <string name="oops_no_such_nearby_place">Oops, no such nearby place</string>
+    <string name="ar">AR</string>
+    <string name="edit_phone_number">Edit Phone Number</string>
+    <string name="saved_places">Saved Places</string>
+    <string name="profile_image">Profile Image</string>
 
 </resources>
