@@ -1,23 +1,23 @@
 package com.example.tripcaptainkotlin.repository
 
 import com.example.tripcaptainkotlin.model.NearbyPlacesResponse
-import com.example.tripcaptainkotlin.service.PlacesService
+import com.example.tripcaptainkotlin.service.NearbyPlacesService
 import retrofit2.Call
 
 
 /**
  * ViewModelに対するデータプロバイダ
  */
-class PlacesRepository {
+class NearbyPlacesRepository {
 
     companion object Factory {
-        val instance: PlacesRepository
+        val instance: NearbyPlacesRepository
             @Synchronized get() {
-                return PlacesRepository()
+                return NearbyPlacesRepository()
             }
     }
 
-    private val placesService: PlacesService = PlacesService.create()
+    private val nearbyPlacesService: NearbyPlacesService = NearbyPlacesService.create()
 
     fun getPlaceList(
         key: String,
@@ -25,6 +25,6 @@ class PlacesRepository {
         radiusInMeters: Int,
         placeType: String
     ): Call<NearbyPlacesResponse> =
-        placesService.nearbyPlaces(key, location, radiusInMeters, placeType)
+        nearbyPlacesService.nearbyPlaces(key, location, radiusInMeters, placeType)
 
 }

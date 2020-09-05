@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityOptions
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -13,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -22,20 +24,22 @@ import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.databinding.FragmentRecommendationsBinding
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.utility.GpsUtils
-import com.example.tripcaptainkotlin.view.adapter.PlacesAdapter
+import com.example.tripcaptainkotlin.view.adapter.NearbyPlacesAdapter
 import com.example.tripcaptainkotlin.view.ui.activity.ArPlaceActivity
 import com.example.tripcaptainkotlin.view.ui.activity.MainActivity
 import com.example.tripcaptainkotlin.viewModel.LocationViewModel
-import com.example.tripcaptainkotlin.viewModel.PlaceListViewModel
+import com.example.tripcaptainkotlin.viewModel.NearbyPlacesViewModel
+import com.example.tripcaptainkotlin.viewModel.SavedPlacesViewModel
 import kotlinx.android.synthetic.main.fragment_recommendations.*
 import kotlinx.android.synthetic.main.layout_place_type_selection.view.*
 
-class RecommendationsFragment() : Fragment() {
+class RecommendationsFragment : Fragment() {
 
     private val TAG = "RecommendationsFragment"
 
     private lateinit var locationViewModel: LocationViewModel
-    private lateinit var placeListViewModel: PlaceListViewModel
+    private lateinit var nearbyPlacesViewModel: NearbyPlacesViewModel
+    private lateinit var savedPlacesViewModel: SavedPlacesViewModel
 
     private lateinit var binding: FragmentRecommendationsBinding
 
@@ -44,19 +48,30 @@ class RecommendationsFragment() : Fragment() {
     private lateinit var currentLocation: Location
     private var placeType = "cafe"
 
-    private val placesAdapter: PlacesAdapter = PlacesAdapter(this@RecommendationsFragment)
+    private lateinit var phoneNumber: String
+
+    private val nearbyPlacesAdapter: NearbyPlacesAdapter =
+        NearbyPlacesAdapter(this@RecommendationsFragment)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
 
+
+        val sharedPref =
+            (activity as MainActivity).getSharedPreferences("SharedPref", Context.MODE_PRIVATE)
+                ?: return
+        val defaultValue = "0174270608"
+        phoneNumber = sharedPref.getString(getString(R.string.phone_number), defaultValue)!!
+
         locationViewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
 
-        placeListViewModel = ViewModelProvider(
+        nearbyPlacesViewModel = ViewModelProvider(
             this,
-            PlaceListViewModel((activity as MainActivity).application, null, "cafe")
-        ).get(PlaceListViewModel::class.java)
+            NearbyPlacesViewModel((activity as MainActivity).application, null, "cafe")
+        ).get(NearbyPlacesViewModel::class.java)
 
+        savedPlacesViewModel = ViewModelProvider(this).get(SavedPlacesViewModel::class.java)
 
     }
 
@@ -67,7 +82,7 @@ class RecommendationsFragment() : Fragment() {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_recommendations, container, false)
         binding.apply {
-            rvPlace.adapter = placesAdapter
+            rvPlace.adapter = nearbyPlacesAdapter
             recommendationsFragment = this@RecommendationsFragment
         }
         return binding.root
@@ -154,8 +169,8 @@ class RecommendationsFragment() : Fragment() {
     private fun startLocationUpdate() {
         locationViewModel.getLocationData().observe(viewLifecycleOwner, Observer {
             currentLocation = it
-            placeListViewModel.loadPlaceList(currentLocation, placeType)
-            placeListViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
+            nearbyPlacesViewModel.loadPlaceList(currentLocation, placeType)
+            nearbyPlacesViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
                 updateRecyclerView(places)
             })
 
@@ -180,8 +195,8 @@ class RecommendationsFragment() : Fragment() {
             val radioButton: RadioButton = group.findViewById(this.checkedId)
             this.placeType = radioButton.text.toString().toLowerCase().replace(' ', '_')
 
-            placeListViewModel.loadPlaceList(currentLocation, this.placeType)
-            placeListViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
+            nearbyPlacesViewModel.loadPlaceList(currentLocation, this.placeType)
+            nearbyPlacesViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
                 updateRecyclerView(places)
             })
             dialog.dismiss()
@@ -189,7 +204,7 @@ class RecommendationsFragment() : Fragment() {
 
     }
 
-    fun viewPlacesInAR(place: Place) {
+    fun viewPlaceInAR(place: Place) {
         val intent = Intent(activity as MainActivity, ArPlaceActivity::class.java)
         intent.putExtra("Place", place)
         startActivity(
@@ -200,14 +215,25 @@ class RecommendationsFragment() : Fragment() {
     }
 
     fun savePlace(place: Place) {
-        //TODO
+        val sharedPref =
+            (activity as MainActivity).getSharedPreferences("SharedPref", Context.MODE_PRIVATE)
+                ?: return
+        val defaultValue = "0174270608"
+        phoneNumber = sharedPref.getString(getString(R.string.phone_number), defaultValue)!!
+
+        savedPlacesViewModel.savePlaceToFirebase(phoneNumber, place)
+        Toast.makeText(
+            context,
+            "${place.name} has been saved by ${phoneNumber}.",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun updateRecyclerView(places: List<Place>) {
         if (places != null) {
             rvPlace.visibility = View.VISIBLE
             llNoResult.visibility = View.GONE
-            placesAdapter.setPlaceList(places)
+            nearbyPlacesAdapter.setPlaceList(places)
 
             if (places.isEmpty()) {
                 rvPlace.visibility = View.GONE

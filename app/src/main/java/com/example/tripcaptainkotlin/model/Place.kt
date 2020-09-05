@@ -25,6 +25,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.ar.sceneform.math.Vector3
 import com.google.maps.android.ktx.utils.sphericalHeading
 import kotlinx.android.parcel.Parcelize
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -41,8 +43,16 @@ data class Place(
     val geometry: Geometry,
     val photos: List<PlacePhoto?>?,
     val opening_hours: OpeningHours,
-    val rating: Float
+    val rating: Float,
+    var last_saved: Date
 ) : Parcelable {
+
+    constructor() : this(
+        "", "",
+        "", Geometry(), emptyList(),
+        OpeningHours(), 0.0f, Date()
+    )
+
     override fun equals(other: Any?): Boolean {
         if (other !is Place) {
             return false
@@ -52,6 +62,17 @@ data class Place(
 
     override fun hashCode(): Int {
         return this.place_id.hashCode()
+    }
+
+    fun setLastSavedWithCurrentDate() {
+        last_saved = Date()
+    }
+
+    fun getLastSavedToString(): String {
+        val formatter = SimpleDateFormat("dd MMM yyyy hh:mm a");
+        val string = "Last Saved:  ${formatter.format(last_saved)}"
+
+        return string
     }
 
     companion object {
@@ -118,13 +139,17 @@ fun Place.getDistance(latLng: LatLng): Double {
 @Parcelize
 data class Geometry(
     val location: GeometryLocation
-) : Parcelable
+) : Parcelable {
+    constructor() : this(GeometryLocation())
+}
 
 @Parcelize
 data class GeometryLocation(
     val lat: Double,
     val lng: Double
 ) : Parcelable {
+    constructor() : this(0.00, 0.00)
+
     val latLng: LatLng
         get() = LatLng(lat, lng)
 }
@@ -135,9 +160,13 @@ data class PlacePhoto(
     val html_attributions: List<String>?,
     val photo_reference: String?,
     val width: Int
-) : Parcelable
+) : Parcelable {
+    constructor() : this(0, emptyList(), "", 0)
+}
 
 @Parcelize
 data class OpeningHours(
     val open_now: Boolean
-) : Parcelable
+) : Parcelable {
+    constructor() : this(false)
+}

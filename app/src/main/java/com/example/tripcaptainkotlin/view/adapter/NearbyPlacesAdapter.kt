@@ -5,12 +5,12 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tripcaptainkotlin.R
-import com.example.tripcaptainkotlin.databinding.ItemPlaceBinding
+import com.example.tripcaptainkotlin.databinding.ItemNearbyPlaceBinding
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.view.ui.fragment.RecommendationsFragment
 
-class PlacesAdapter(val fragment: RecommendationsFragment) :
-    RecyclerView.Adapter<PlacesAdapter.PlaceViewHolder>() {
+class NearbyPlacesAdapter(val fragment: RecommendationsFragment) :
+    RecyclerView.Adapter<NearbyPlacesAdapter.PlaceViewHolder>() {
 
     private var placeList: List<Place>? = null
 
@@ -30,9 +30,9 @@ class PlacesAdapter(val fragment: RecommendationsFragment) :
     ): PlaceViewHolder {
         val binding = DataBindingUtil.inflate(
             LayoutInflater.from(parent.context),
-            R.layout.item_place, parent,
+            R.layout.item_nearby_place, parent,
             false
-        ) as ItemPlaceBinding
+        ) as ItemNearbyPlaceBinding
         binding.apply {
             recommendationsFragment = fragment
 
@@ -47,6 +47,6 @@ class PlacesAdapter(val fragment: RecommendationsFragment) :
         holder.binding.executePendingBindings()
     }
 
-    open class PlaceViewHolder(val binding: ItemPlaceBinding) :
+    open class PlaceViewHolder(val binding: ItemNearbyPlaceBinding) :
         RecyclerView.ViewHolder(binding.root)
 }

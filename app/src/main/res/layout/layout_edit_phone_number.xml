@@ -5,6 +5,10 @@
     <data>
 
         <variable
+            name="phoneNumber"
+            type="String" />
+
+        <variable
             name="mainActivity"
             type="com.example.tripcaptainkotlin.view.ui.activity.MainActivity" />
     </data>
@@ -18,7 +22,8 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="012-3456789"
+            android:inputType="phone"
+            android:text="@={phoneNumber}"
             android:textSize="20sp" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -48,7 +53,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/btnCancel"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:onClick="@{() -> mainActivity.savePhoneNumber(phoneNumber)}" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -25,7 +25,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.ui.activity.SavedPlacesActivity"></activity>
+        <activity android:name=".view.ui.fragment.SavedPlacesFragment"></activity>
         <!--
          Indicates that this app requires Google Play Services for AR ("AR Required") and causes
              the Google Play Store to download and intall Google Play Services for AR along with

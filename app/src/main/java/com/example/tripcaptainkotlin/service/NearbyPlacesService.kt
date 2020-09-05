@@ -28,7 +28,7 @@ import retrofit2.http.Query
  *
  * @see [Place Search](https://developers.google.com/places/web-service/search)
  */
-interface PlacesService {
+interface NearbyPlacesService {
 
     @GET("nearbysearch/json")
     fun nearbyPlaces(
@@ -41,7 +41,7 @@ interface PlacesService {
     companion object {
         private const val ROOT_URL = "https://maps.googleapis.com/maps/api/place/"
 
-        fun create(): PlacesService {
+        fun create(): NearbyPlacesService {
             val logger = HttpLoggingInterceptor()
             logger.level = HttpLoggingInterceptor.Level.BODY
             val okHttpClient = OkHttpClient.Builder()
@@ -53,7 +53,7 @@ interface PlacesService {
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build()
-            return retrofit.create(PlacesService::class.java)
+            return retrofit.create(NearbyPlacesService::class.java)
         }
     }
 }

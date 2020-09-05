@@ -1,4 +1,4 @@
-package com.example.tripcaptainkotlin.model
+package com.example.tripcaptainkotlin.liveData
 
 import android.annotation.SuppressLint
 import android.content.Context

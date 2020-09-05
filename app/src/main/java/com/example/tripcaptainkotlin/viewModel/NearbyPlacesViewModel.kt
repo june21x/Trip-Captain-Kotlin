@@ -10,13 +10,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.model.NearbyPlacesResponse
 import com.example.tripcaptainkotlin.model.Place
-import com.example.tripcaptainkotlin.repository.PlacesRepository
+import com.example.tripcaptainkotlin.repository.NearbyPlacesRepository
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class PlaceListViewModel(
+class NearbyPlacesViewModel(
     var application: Application,
     var location: Location?,
     var placeType: String?
@@ -24,12 +24,12 @@ class PlaceListViewModel(
     ViewModelProvider.Factory, ViewModel() {
 
     private val TAG = "PlaceListViewModel"
-    private val repository = PlacesRepository.instance
+    private val repository = NearbyPlacesRepository.instance
     var placeListLiveData: MutableLiveData<List<Place>> = MutableLiveData()
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         loadPlaceList(location, placeType)
-        return PlaceListViewModel(application, location, placeType) as T
+        return NearbyPlacesViewModel(application, location, placeType) as T
     }
 
     fun loadPlaceList(location: Location?, placeType: String?) =

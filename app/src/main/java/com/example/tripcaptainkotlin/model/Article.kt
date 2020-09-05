@@ -20,7 +20,7 @@ data class Article(
     val content: String
 ) {
     fun getPublishedAtToString(): String {
-        val formatter = SimpleDateFormat("dd/MM/yyyy");
+        val formatter = SimpleDateFormat("dd MMM yyyy");
         return formatter.format(publishedAt)
     }
 

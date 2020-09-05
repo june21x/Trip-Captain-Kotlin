@@ -20,7 +20,7 @@ import com.example.tripcaptainkotlin.ar.PlaceNode
 import com.example.tripcaptainkotlin.ar.PlacesArFragment
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.model.getPositionVector
-import com.example.tripcaptainkotlin.service.PlacesService
+import com.example.tripcaptainkotlin.service.NearbyPlacesService
 import com.example.tripcaptainkotlin.viewModel.LocationViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
@@ -46,7 +46,7 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var place: Place
 
-    private lateinit var placesService: PlacesService
+    private lateinit var nearbyPlacesService: NearbyPlacesService
     private lateinit var arFragment: PlacesArFragment
     private lateinit var mapFragment: SupportMapFragment
 
@@ -83,7 +83,7 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
             supportFragmentManager.findFragmentById(R.id.maps_fragment) as SupportMapFragment
 
         sensorManager = getSystemService()!!
-        placesService = PlacesService.create()
+        nearbyPlacesService = NearbyPlacesService.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val permissions = listOf(

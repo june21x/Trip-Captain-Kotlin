@@ -11,7 +11,7 @@
     <string name="loading_news">Loading News ...</string>
     <string name="article_list">Article List</string>
     <string name="no_image_url">https://thumbs.dreamstime.com/b/no-image-available-icon-photo-camera-flat-vector-illustration-132483097.jpg</string>
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="view_in_ar">View in AR</string>
     <string name="back">Back</string>
@@ -24,5 +24,6 @@
     <string name="edit_phone_number">Edit Phone Number</string>
     <string name="saved_places">Saved Places</string>
     <string name="profile_image">Profile Image</string>
+    <string name="phone_number">Phone Number</string>
 
 </resources>
