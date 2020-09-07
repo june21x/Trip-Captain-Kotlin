@@ -64,7 +64,7 @@ class ArticleListFragment : Fragment() {
 
     fun viewArticle(article: Article) {
         val articleFragment = ArticleFragment.forArticle(article.url) //詳細のFragment
-
+        (activity as MainActivity).clearFragments()
         (activity as MainActivity).supportFragmentManager
             .beginTransaction()
             .addToBackStack(null)

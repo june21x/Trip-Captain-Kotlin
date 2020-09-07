@@ -14,7 +14,7 @@
 
 package com.example.tripcaptainkotlin.service
 
-import com.example.tripcaptainkotlin.model.NearbyPlacesResponse
+import com.example.tripcaptainkotlin.model.DirectionsResponse
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -28,19 +28,20 @@ import retrofit2.http.Query
  *
  * @see [Place Search](https://developers.google.com/places/web-service/search)
  */
-interface PlacePhotoService {
+interface DirectionsService {
 
-    @GET("photo")
-    fun placePhoto(
+    @GET("json")
+    fun getDirections(
         @Query("key") apiKey: String,
-        @Query("maxheight") maxHeight: Int,
-        @Query("photoreference") photoReference: String?
-    ): Call<NearbyPlacesResponse>
+        @Query("origin") origin: String,
+        @Query("destination") destination: String,
+        @Query("mode") mode: String
+    ): Call<DirectionsResponse>
 
     companion object {
-        private const val ROOT_URL = "https://maps.googleapis.com/maps/api/place/"
+        private const val ROOT_URL = "https://maps.googleapis.com/maps/api/directions/"
 
-        fun create(): PlacePhotoService {
+        fun create(): DirectionsService {
             val logger = HttpLoggingInterceptor()
             logger.level = HttpLoggingInterceptor.Level.BODY
             val okHttpClient = OkHttpClient.Builder()
@@ -52,7 +53,7 @@ interface PlacePhotoService {
                 .client(okHttpClient)
                 .addConverterFactory(converterFactory)
                 .build()
-            return retrofit.create(PlacePhotoService::class.java)
+            return retrofit.create(DirectionsService::class.java)
         }
     }
 }

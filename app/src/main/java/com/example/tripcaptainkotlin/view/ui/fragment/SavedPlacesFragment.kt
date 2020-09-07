@@ -38,7 +38,7 @@ class SavedPlacesFragment : Fragment() {
         val sharedPref =
             (activity as MainActivity).getSharedPreferences("SharedPref", Context.MODE_PRIVATE)
                 ?: return
-        val defaultValue = "0174270608"
+        val defaultValue = ""
         phoneNumber = sharedPref.getString(getString(R.string.phone_number), defaultValue)!!
     }
 
@@ -53,7 +53,10 @@ class SavedPlacesFragment : Fragment() {
         binding.apply {
             mActivity = activity as MainActivity
             rvSavedPlaces.adapter = savedPlacesAdapter
-            savedPlacesViewModel.getSavedPlaces((activity as MainActivity).application, phoneNumber)
+            savedPlacesViewModel.getSavedPlaces(
+                (activity as MainActivity).application,
+                phoneNumber
+            )
                 .observe(viewLifecycleOwner, Observer {
                     savedPlacesAdapter.setPlaceList(it)
                 })

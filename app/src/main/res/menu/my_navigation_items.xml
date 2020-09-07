@@ -4,6 +4,11 @@
     tools:showIn="navigation_view">
 
     <item
+        android:id="@+id/navHome"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="@string/home" />
+
+    <item
         android:id="@+id/navEditPhoneNumber"
         android:icon="@drawable/ic_baseline_edit_24"
         android:title="@string/edit_phone_number" />
@@ -12,5 +17,10 @@
         android:id="@+id/navSavedPlaces"
         android:icon="@drawable/ic_baseline_bookmarks_24"
         android:title="@string/saved_places" />
+
+    <item
+        android:id="@+id/navUserGuide"
+        android:icon="@drawable/ic_baseline_info_24"
+        android:title="User Guide" />
 
 </menu>

@@ -25,5 +25,10 @@
     <string name="saved_places">Saved Places</string>
     <string name="profile_image">Profile Image</string>
     <string name="phone_number">Phone Number</string>
+    <string name="first_time_user">First Time User</string>
+    <string name="home">Home</string>
+    <string name="safety_warning">SAFETY WARNING</string>
+    <string name="safety_warning_description">Avoid using phone while walking or driving on the road!\nPlease be aware of your surrounding.\nThis feature is <b>experimental</b> and <b>not suitable for real-world usage</b>.</string>
+    <string name="ok_got_it">OK, got it</string>
 
 </resources>

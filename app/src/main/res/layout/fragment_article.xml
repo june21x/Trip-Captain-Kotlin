@@ -87,7 +87,7 @@
                 android:layout_margin="30dp"
                 android:contentDescription="@string/back"
                 app:icon="@drawable/ic_baseline_arrow_back_24"
-                android:onClick="@{() ->  mActivity.onBackPressed()}" />
+                android:onClick="@{() ->  mActivity.clearFragments()}" />
 
         </LinearLayout>
 

@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.repository.SavedPlacesRepository
-import com.example.tripcaptainkotlin.service.PlaceSearchByIdService
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
@@ -18,7 +17,6 @@ class SavedPlacesViewModel() : ViewModel() {
     private val TAG = "SAVED_PLACES_VIEW_MODEL"
     private var savedPlacesRepository = SavedPlacesRepository()
     private var savedPlaces: MutableLiveData<List<Place>> = MutableLiveData()
-    private val placeSearchByIdService = PlaceSearchByIdService.create()
 
     // save place to firebase
     fun savePlaceToFirebase(phoneNumber: String, place: Place) {

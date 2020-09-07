@@ -218,15 +218,23 @@ class RecommendationsFragment : Fragment() {
         val sharedPref =
             (activity as MainActivity).getSharedPreferences("SharedPref", Context.MODE_PRIVATE)
                 ?: return
-        val defaultValue = "0174270608"
+        val defaultValue = ""
         phoneNumber = sharedPref.getString(getString(R.string.phone_number), defaultValue)!!
 
-        savedPlacesViewModel.savePlaceToFirebase(phoneNumber, place)
-        Toast.makeText(
-            context,
-            "${place.name} has been saved by ${phoneNumber}.",
-            Toast.LENGTH_SHORT
-        ).show()
+        if (phoneNumber != "") {
+            savedPlacesViewModel.savePlaceToFirebase(phoneNumber, place)
+            Toast.makeText(
+                context,
+                "${place.name} has been saved by ${phoneNumber}.",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            Toast.makeText(activity, "Phone Number is needed to save place", Toast.LENGTH_SHORT)
+                .show()
+            (activity as MainActivity).editPhoneNumber()
+        }
+
+
     }
 
     private fun updateRecyclerView(places: List<Place>) {

@@ -2,6 +2,7 @@ package com.example.tripcaptainkotlin.view.ui.activity
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -10,34 +11,38 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.tripcaptainkotlin.R
 import com.example.tripcaptainkotlin.ar.PlaceNode
 import com.example.tripcaptainkotlin.ar.PlacesArFragment
+import com.example.tripcaptainkotlin.databinding.LayoutSafetyWarningBinding
+import com.example.tripcaptainkotlin.model.DirectionsResponse
 import com.example.tripcaptainkotlin.model.Place
 import com.example.tripcaptainkotlin.model.getPositionVector
-import com.example.tripcaptainkotlin.service.NearbyPlacesService
+import com.example.tripcaptainkotlin.service.DirectionsService
 import com.example.tripcaptainkotlin.viewModel.LocationViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.ar.sceneform.AnchorNode
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
 
 class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
@@ -46,14 +51,15 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var place: Place
 
-    private lateinit var nearbyPlacesService: NearbyPlacesService
     private lateinit var arFragment: PlacesArFragment
     private lateinit var mapFragment: SupportMapFragment
+
+    private lateinit var layoutSafetyWarningBinding: LayoutSafetyWarningBinding
+    private lateinit var dialog: AlertDialog
 
     // Location
     private lateinit var locationViewModel: LocationViewModel
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
 
     // Sensor
     private lateinit var sensorManager: SensorManager
@@ -83,7 +89,6 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
             supportFragmentManager.findFragmentById(R.id.maps_fragment) as SupportMapFragment
 
         sensorManager = getSystemService()!!
-        nearbyPlacesService = NearbyPlacesService.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val permissions = listOf(
@@ -98,8 +103,9 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
                 override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                     report?.let {
                         if (report.areAllPermissionsGranted()) {
-                            Toast.makeText(this@ArPlaceActivity, "OK", Toast.LENGTH_SHORT)
+                            Toast.makeText(this@ArPlaceActivity, "OK", Toast.LENGTH_SHORT).show()
 
+                            showSafetyWarning()
                             locationViewModel.getLocationData()
                                 .observe(this@ArPlaceActivity, Observer {
                                     currentLocation = it
@@ -121,11 +127,10 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
                 }
             })
             .withErrorListener {
-                Toast.makeText(this@ArPlaceActivity, it.name, Toast.LENGTH_SHORT)
+                Toast.makeText(this@ArPlaceActivity, it.name, Toast.LENGTH_SHORT).show()
             }
             .check()
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -148,6 +153,30 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
     override fun onPause() {
         super.onPause()
         sensorManager.unregisterListener(this)
+    }
+
+    private fun showSafetyWarning() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        // set the custom layout
+        layoutSafetyWarningBinding = DataBindingUtil.inflate(
+            LayoutInflater.from(this),
+            R.layout.layout_safety_warning,
+            null,
+            false
+        )
+        layoutSafetyWarningBinding.apply {
+            mActivity = this@ArPlaceActivity
+        }
+
+        builder.setView(layoutSafetyWarningBinding.getRoot())
+
+        // create and show the alert dialog
+        dialog = builder.create()
+        dialog.show()
+    }
+
+    fun closeDialog() {
+        dialog.dismiss()
     }
 
     private fun setUpAr() {
@@ -204,41 +233,6 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         matchingMarker?.showInfoWindow()
     }
 
-//    private fun createLocationRequest() {
-//        locationRequest = LocationRequest().apply {
-//            interval = 10000
-//            fastestInterval = 5000
-//            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-//        }
-//
-//        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-//        val client: SettingsClient = LocationServices.getSettingsClient(this)
-//        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-//
-//        task.addOnSuccessListener { locationSettingsResponse ->
-//            // All location settings are satisfied. The client can initialize
-//            // location requests here.
-//            setUpMaps()
-//        }
-//
-//        task.addOnFailureListener { exception ->
-//            if (exception is ResolvableApiException) {
-//                // Location settings are not satisfied, but this can be fixed
-//                // by showing the user a dialog.
-//                try {
-//                    // Show the dialog by calling startResolutionForResult(),
-//                    // and check the result in onActivityResult().
-//                    exception.startResolutionForResult(
-//                        this@ArPlaceActivity,
-//                        REQUEST_CHECK_SETTINGS
-//                    )
-//                } catch (sendEx: IntentSender.SendIntentException) {
-//                    // Ignore the error.
-//                }
-//            }
-//        }
-//    }
-
     @SuppressLint("MissingPermission")
     private fun setUpMaps() {
         mapFragment.getMapAsync { googleMap ->
@@ -248,6 +242,7 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
             locationViewModel.getLocationData().observe(this@ArPlaceActivity, Observer {
                 val pos = CameraPosition.fromLatLngZoom(it.latLng, 16f)
                 googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(pos))
+                getDirections(it, googleMap)
             })
 
             googleMap.setOnMarkerClickListener { marker ->
@@ -262,58 +257,88 @@ class ArPlaceActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun getCurrentLocation(onSuccess: (Location) -> Unit) {
-        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            currentLocation = location
-            onSuccess(location)
-        }.addOnFailureListener {
-            Log.e(TAG, "Could not get location")
-        }
+    private fun getDirections(currentLocation: Location, googleMap: GoogleMap) {
+        val directionsService = DirectionsService.create()
+        directionsService.getDirections(
+            getString(R.string.google_maps_key),
+            "${currentLocation.latitude},${currentLocation.longitude}",
+            "place_id:${place.place_id}",
+            "walking"
+        ).enqueue(object : Callback<DirectionsResponse> {
+            override fun onFailure(call: Call<DirectionsResponse>, t: Throwable) {
+                Log.e(TAG + "Directions", "Failed to get directions", t)
+            }
+
+            override fun onResponse(
+                call: Call<DirectionsResponse>,
+                response: Response<DirectionsResponse>
+            ) {
+                if (!response.isSuccessful) {
+                    Log.e(TAG + "Directions", "Failed to get directions")
+                    return
+                }
+
+                val points = response.body()!!.results[0].overviewPolyline.points
+                val decodedPoints = decodePoly(points)
+
+                val POLYLINE_STROKE_WIDTH_PX = 12
+                val PATTERN_GAP_LENGTH_PX = 20
+                val DOT: PatternItem = Dot()
+                val GAP: PatternItem = Gap(PATTERN_GAP_LENGTH_PX.toFloat())
+                val PATTERN_POLYLINE_DOTTED = listOf(GAP, DOT)
+
+                //Create PolylineOptions
+                val polylineOptions =
+                    PolylineOptions()
+                        .width(POLYLINE_STROKE_WIDTH_PX.toFloat())
+                        .pattern(PATTERN_POLYLINE_DOTTED)
+
+                //Add points to polylineOption
+                if (decodedPoints != null) {
+                    for (point in decodedPoints) {
+                        polylineOptions.add(point)
+                    }
+                }
+
+                googleMap.addPolyline(polylineOptions)
+            }
+        })
     }
 
-    private fun updateCameraBearing(
-        googleMap: GoogleMap?,
-        bearing: Float
-    ) {
-        if (googleMap == null) return
-        val camPos = CameraPosition
-            .builder(
-                googleMap.cameraPosition // current Camera
+    private fun decodePoly(encoded: String): List<LatLng>? {
+        val poly: MutableList<LatLng> = ArrayList()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].toInt() - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lat += dlat
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].toInt() - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lng += dlng
+            val p = LatLng(
+                lat.toDouble() / 1E5,
+                lng.toDouble() / 1E5
             )
-            .bearing(bearing)
-            .build()
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos))
+            poly.add(p)
+        }
+        return poly
     }
-
-//    private fun getNearbyPlaces(location: Location) {
-//        val apiKey = this.getString(R.string.google_maps_key)
-//        placesService.nearbyPlaces(
-//            apiKey = apiKey,
-//            location = "${location.latitude},${location.longitude}",
-//            radiusInMeters = 500,
-//            placeType = "cafe"
-//        ).enqueue(
-//            object : Callback<NearbyPlacesResponse> {
-//                override fun onFailure(call: Call<NearbyPlacesResponse>, t: Throwable) {
-//                    Log.e(TAG, "Failed to get nearby places", t)
-//                }
-//
-//                override fun onResponse(
-//                    call: Call<NearbyPlacesResponse>,
-//                    response: Response<NearbyPlacesResponse>
-//                ) {
-//                    if (!response.isSuccessful) {
-//                        Log.e(TAG, "Failed to get nearby places")
-//                        return
-//                    }
-//
-//                    val places = response.body()?.results ?: emptyList()
-//                    this@ArPlaceActivity.places = places
-//                }
-//            }
-//        )
-//    }
 
     private fun isSupportedDevice(): Boolean {
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
