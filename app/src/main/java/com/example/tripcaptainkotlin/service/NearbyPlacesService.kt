@@ -35,7 +35,7 @@ interface NearbyPlacesService {
         @Query("key") apiKey: String,
         @Query("location") location: String,
         @Query("radius") radiusInMeters: Int,
-        @Query("type") placeType: String
+        @Query("keyword") placeType: String
     ): Call<NearbyPlacesResponse>
 
     companion object {

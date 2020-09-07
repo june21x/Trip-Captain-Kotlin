@@ -37,16 +37,27 @@ class RecommendationsFragment : Fragment() {
 
     private val TAG = "RecommendationsFragment"
 
-    private lateinit var locationViewModel: LocationViewModel
-    private lateinit var nearbyPlacesViewModel: NearbyPlacesViewModel
-    private lateinit var savedPlacesViewModel: SavedPlacesViewModel
-
-    private lateinit var binding: FragmentRecommendationsBinding
-
     private var isGPSEnabled = false
     private var checkedId = R.id.rbCafe
     private lateinit var currentLocation: Location
     private var placeType = "cafe"
+
+    private val locationViewModel by lazy {
+        ViewModelProvider(this@RecommendationsFragment).get(LocationViewModel::class.java)
+    }
+
+    private val nearbyPlacesViewModel by lazy {
+        ViewModelProvider(
+            this@RecommendationsFragment,
+            NearbyPlacesViewModel((activity as MainActivity).application, null, placeType)
+        ).get(NearbyPlacesViewModel::class.java)
+    }
+
+    private val savedPlacesViewModel by lazy {
+        ViewModelProvider(this@RecommendationsFragment).get(SavedPlacesViewModel::class.java)
+    }
+
+    private lateinit var binding: FragmentRecommendationsBinding
 
     private lateinit var phoneNumber: String
 
@@ -57,21 +68,17 @@ class RecommendationsFragment : Fragment() {
         super.onCreate(savedInstanceState)
         retainInstance = true
 
-
         val sharedPref =
             (activity as MainActivity).getSharedPreferences("SharedPref", Context.MODE_PRIVATE)
                 ?: return
         val defaultValue = "0174270608"
         phoneNumber = sharedPref.getString(getString(R.string.phone_number), defaultValue)!!
 
-        locationViewModel = ViewModelProvider(this).get(LocationViewModel::class.java)
 
-        nearbyPlacesViewModel = ViewModelProvider(
-            this,
-            NearbyPlacesViewModel((activity as MainActivity).application, null, "cafe")
-        ).get(NearbyPlacesViewModel::class.java)
 
-        savedPlacesViewModel = ViewModelProvider(this).get(SavedPlacesViewModel::class.java)
+
+
+        startLocationUpdate(placeType)
 
     }
 
@@ -95,6 +102,7 @@ class RecommendationsFragment : Fragment() {
 
             override fun gpsStatus(isGPSEnable: Boolean) {
                 this@RecommendationsFragment.isGPSEnabled = isGPSEnable
+                invokeLocationAction()
             }
         })
     }
@@ -118,7 +126,7 @@ class RecommendationsFragment : Fragment() {
         when {
 //            !isGPSEnabled -> latLong.text = getString(R.string.enable_gps)
 
-            isPermissionsGranted() -> startLocationUpdate()
+            isPermissionsGranted() -> startLocationUpdate(placeType)
 
 //            shouldShowRequestPermissionRationale() -> latLong.text = getString(R.string.permission_request)
 
@@ -166,15 +174,18 @@ class RecommendationsFragment : Fragment() {
         }
     }
 
-    private fun startLocationUpdate() {
-        locationViewModel.getLocationData().observe(viewLifecycleOwner, Observer {
-            currentLocation = it
-            nearbyPlacesViewModel.loadPlaceList(currentLocation, placeType)
-            nearbyPlacesViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
-                updateRecyclerView(places)
+    private fun startLocationUpdate(placeType: String) {
+        if (isGPSEnabled) {
+            locationViewModel.getLocationData().observe(viewLifecycleOwner, Observer {
+                currentLocation = it
+                nearbyPlacesViewModel.loadPlaceList(currentLocation, placeType)
+                nearbyPlacesViewModel.placeListLiveData.observe(
+                    viewLifecycleOwner,
+                    Observer { places ->
+                        updateRecyclerView(places)
+                    })
             })
-
-        })
+        }
     }
 
     fun switchPlaceType() {
@@ -193,15 +204,11 @@ class RecommendationsFragment : Fragment() {
         customLayout.rgPlaceType.setOnCheckedChangeListener { group, checkedId ->
             this.checkedId = checkedId
             val radioButton: RadioButton = group.findViewById(this.checkedId)
-            this.placeType = radioButton.text.toString().toLowerCase().replace(' ', '_')
+            placeType = radioButton.text.toString().toLowerCase().replace(' ', '_')
 
-            nearbyPlacesViewModel.loadPlaceList(currentLocation, this.placeType)
-            nearbyPlacesViewModel.placeListLiveData.observe(viewLifecycleOwner, Observer { places ->
-                updateRecyclerView(places)
-            })
+            startLocationUpdate(placeType)
             dialog.dismiss()
         }
-
     }
 
     fun viewPlaceInAR(place: Place) {

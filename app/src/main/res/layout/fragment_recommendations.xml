@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
         <variable
             name="recommendationsFragment"
             type="com.example.tripcaptainkotlin.view.ui.fragment.RecommendationsFragment" />
@@ -17,7 +16,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPlace"
             android:layout_width="match_parent"
-            android:layout_height="650dp"
+            android:layout_height="match_parent"
+            android:paddingBottom="100dp"
             app:layoutManager="LinearLayoutManager" />
 
         <LinearLayout

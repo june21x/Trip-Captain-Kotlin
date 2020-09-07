@@ -18,6 +18,13 @@
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/rbAccomodation"
+                android:textSize="16sp"
+                android:text="Accomodation" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:id="@+id/rbAmusementPark"
                 android:textSize="16sp"
                 android:text="Amusement Park" />
@@ -46,9 +53,23 @@
             <RadioButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/rbConvenientStore"
+                android:textSize="16sp"
+                android:text="Convenient Store" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:id="@+id/rbMuseum"
                 android:textSize="16sp"
                 android:text="Museum" />
+
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/rbShoppingMall"
+                android:textSize="16sp"
+                android:text="Shopping Mall" />
 
             <RadioButton
                 android:layout_width="match_parent"
